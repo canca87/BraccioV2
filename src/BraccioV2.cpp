@@ -157,42 +157,42 @@ void Braccio::setDelta(int joint, int value) {
 void Braccio::_setServo(int joint, int value, bool updateTarget) {
   switch (joint) {
     case BASE_ROT:
-      _base.write(value);
+      _base.writeFP(value);
       _currentJointPositions[BASE_ROT] = value;
       if (updateTarget) {
         _targetJointPositions[BASE_ROT] = value;
       }
       break;
     case SHOULDER:
-      _shoulder.write(value);
+      _shoulder.writeFP(value);
       _currentJointPositions[SHOULDER] = value;
       if (updateTarget) {
         _targetJointPositions[SHOULDER] = value;
       }
       break;
     case ELBOW:
-      _elbow.write(value);
+      _elbow.writeFP(value);
       _currentJointPositions[ELBOW] = value;
       if (updateTarget) {
         _targetJointPositions[ELBOW] = value;
       }
       break;
     case WRIST:
-      _wrist.write(value);
+      _wrist.writeFP(value);
       _currentJointPositions[WRIST] = value;
       if (updateTarget) {
         _targetJointPositions[WRIST] = value;
       }
       break;
     case WRIST_ROT:
-      _wrist_rot.write(value);
+      _wrist_rot.writeFP(value);
       _currentJointPositions[WRIST_ROT] = value;
       if (updateTarget) {
         _targetJointPositions[WRIST_ROT] = value;
       }
       break;
     case GRIPPER:
-      _gripper.write(value);
+      _gripper.writeFP(value);
       _currentJointPositions[GRIPPER] = value;
       if (updateTarget) {
         _targetJointPositions[GRIPPER] = value;
@@ -206,11 +206,24 @@ void Braccio::_moveServo(int joint) {
   int currentPos = _currentJointPositions[joint];
   int targetPos = _targetJointPositions[joint];
   if (currentPos != targetPos) {
-    int dir = (currentPos <= targetPos) ? 1 : -1;
-    int delta = _jointDelta[joint];
-    int dirDelta = dir * delta;
-    int newPos = currentPos + dirDelta;
-    _setServo(joint, newPos, false);
+    //Be sure that the _joinDelta wont take us beyond the point of reference (or we will oscillate around out end point):
+    int distanceToGo = 0;
+    if ((currentPos - targetPos) < 0) {
+      distanceToGo = targetPos - currentPos;
+    }
+    else {
+      distanceToGo = currentPos - targetPos;
+    }
+    if (distanceToGo > _jointDelta[joint]){
+      int dir = (currentPos <= targetPos) ? 1 : -1;
+      int delta = _jointDelta[joint];
+      int dirDelta = dir * delta;
+      int newPos = currentPos + dirDelta;
+      _setServo(joint, newPos, false);
+    }
+    else {
+      _setServo(joint, targetPos, false); //move to the target position directly if the distance to go is less than jointDelta
+    }
   }
 }
 //Delays for ms with movement updates every t ms
@@ -230,6 +243,7 @@ void Braccio::safeDelay(int ms){
 int Braccio::getCenter(int joint){
   return _jointCenter[joint];
 }
+
 //Processes movement of each joint to achieve target endpoint
 void Braccio::update() {
   _moveServo(BASE_ROT);

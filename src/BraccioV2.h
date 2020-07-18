@@ -20,7 +20,7 @@
 #define BRACCIOV2_H_
 
 #include <Arduino.h>
-#include <Servo.h>
+#include "Servo.h"
 
 #define SOFT_START_VALUE 0
 
@@ -43,7 +43,7 @@
 
 //Max/min values for all servos globally
 #define GLOBAL_MIN 0
-#define GLOBAL_MAX 180
+#define GLOBAL_MAX 18000
 
 class Braccio {
   public:
@@ -75,10 +75,10 @@ class Braccio {
     Servo _wrist_rot;
     Servo _wrist;
     Servo _gripper;
-    int _jointMax[7] = {180, 165, 180, 180, 180, 73};
+    int _jointMax[7] = {18000, 17300, 18000, 18000, 18000, 7300};
     int _jointMin[7] = {0, 15, 0, 0, 0, 10};
-    int _jointCenter[7] = {90, 90, 90, 90, 90, 50};
-    int _jointDelta[7] = {1, 1, 1, 1, 1, 1};
+    int _jointCenter[7] = {9000, 9000, 9000, 9000, 9000, 5000};
+    int _jointDelta[7] = {180000, 180000, 180000, 180000, 180000, 180000};
     int _currentJointPositions[7];
     int _targetJointPositions[7];
 };
